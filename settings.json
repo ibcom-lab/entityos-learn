@@ -1,0 +1,16 @@
+{
+	"mydigitalstructure":
+	{
+		"hostname": "api.debug.mydigitalstructure.cloud", 
+		"logon": "x", 
+		"password": "x",
+		"email": "support@mydigitalstructure.cloud",
+		"testing": 
+		{
+			"status": "true",
+			"showData": "true",
+			"break": "-"
+		},
+		"convert": "true"
+	}
+}	

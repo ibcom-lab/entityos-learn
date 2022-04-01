@@ -1,0 +1,11 @@
+[
+    {
+        "name": "learn-using-factory-from-object-file-hello-world-1",
+        "code": "function (param, data) {console.log('CREATED FROM FACTORY OBJECT 1; ' + param + ' ' + data)}"
+    },
+    {
+        "name": "learn-using-factory-from-object-file-hello-world-2",
+        "code": "{console.log('CREATED FROM FACTORY OBJECT 2; ' + param + ' ' + data)}",
+        "arguments": "param, data"
+    }
+]

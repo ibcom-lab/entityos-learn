@@ -1,11 +1,11 @@
-mydigitalstructure SDK Node.js Example app
+entityOS SDK Node.js Example app
 ==========================================
 
-Node.js example app using the mydigitalstucture npm module.
+Node.js example app using the entityOS npm module.
 
-> https://npmjs.org/package/mydigitalstructure
+> https://npmjs.org/package/entityos
 
-> https://docs.mydigitalstructure.cloud/gettingstarted_nodejs
+> https://docs.entityos.cloud/gettingstarted_nodejs
 
 Check out `learn.js` for code example (with comments) and `settings.json` to update the username & password used to authenicate for the mydigitalstructrue.cloud methods.
 
@@ -13,26 +13,26 @@ Check out `learn.js` for code example (with comments) and `settings.json` to upd
 
 **Initialise:**
 
-`var mydigitalstructure = require('mydigitalstructure');`
+`var entityos = require('entityos');`
 
 **Controller methods:**
 
-`mydigitalstructure.add({name:, note:, code:});`
+`entityos.add({name:, note:, code:});`
 
-`mydigitalstructure.invoke(name, parameters for controller, data for controller);`
+`entityos.invoke(name, parameters for controller, data for controller);`
 
 
 **Local data storage methods:**
 
-`mydigitalstructure.set({scope:, context:, name:, value:});`
+`entityos.set({scope:, context:, name:, value:});`
 
-`mydigitalstructure.get({scope:, context:, name:});`
+`entityos.get({scope:, context:, name:});`
 
 
 **Cloud data storage methods:**
 
-`mydigitalstructure.cloud.save({object:, data:, callback:});`
+`entityos.cloud.save({object:, data:, callback:});`
 
-`mydigitalstructure.cloud.retrieve({object:, data:, callback:});`
+`entityos.cloud.retrieve({object:, data:, callback:});`
 
-`mydigitalstructure.cloud.invoke({object:, data:, callback:});`
+`entityos.cloud.invoke({object:, data:, callback:});`

@@ -1,10 +1,5 @@
 /*
-	LEARN; UPLOAD FILE TO entityos.CLOUD.
-
-	This is the same as other lambda with a wrapper to process data from API Gateway & respond to it.
-
-	This is an example app to use as starting point for building a mydigitalstucture.cloud based nodejs app
-	that you plan to host using AWS Lambda and trigger via API gateway.
+	LEARN; UPLOAD FILE TO entityos.cloud.
 
 	To run it on your local computer your need to install:
 
@@ -17,10 +12,6 @@
 	- where the data in event.json will be passed to the handler as event and the settings.json data will passed as context.
 
 	Also see learn.js for more example code using the entityos node module.
-
-	API Gateway docs:
-	- https://docs.aws.amazon.com/lambda/latest/dg/nodejs-handler.html
-	
 */
 
 exports.handler = function (event, context, callback)

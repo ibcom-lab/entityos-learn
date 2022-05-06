@@ -1,7 +1,7 @@
 /*
 	LEARN; YOUR OWN API; USING AWS API GATEWAY & LAMBDA.
 
-	This is the same as other lambda with a wrapper to process data from API Gateway & respond to it.
+	This is the same as other lambda functions, but with a wrapper to process data from API Gateway & respond to it.
 
 	This is an example app to use as starting point for building a mydigitalstucture.cloud based nodejs app
 	that you plan to host using AWS Lambda and trigger via API gateway.

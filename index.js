@@ -1,5 +1,5 @@
 /*
-	This is an example app to use as starting point for building a mydigitalstucture.cloud based nodejs app
+	This is an example app to use as starting point for building a entityos.cloud based nodejs app
 	that you plan to host using AWS Lambda.
 
 	To run it on your local computer your need to install:
@@ -8,20 +8,20 @@
 
 	And then run as:
 
-	lambda-local -l index.js -t 9000 -e learn-event.json -envfile learn-context.json
+	lambda-local -l index.js -t 9000 -e learn-event.json
 
 	- where the data in event.json will be passed to the handler as event and the settings.json data will passed as context.
 
-	Also see learn.js for more example code using the mydigitalstructure node module.
+	Also see learn.js for more example code using the entityos node module.
 */
 
 exports.handler = function (event, context, callback)
 {
-	var mydigitalstructure = require('mydigitalstructure')
+	var entityos = require('	')
 	var _ = require('lodash')
 	var moment = require('moment');
 
-	mydigitalstructure.set(
+	entityos.set(
 	{
 		scope: 'learn',
 		context: 'lambda',
@@ -30,35 +30,35 @@ exports.handler = function (event, context, callback)
 	});
 
 	/*
-		mydigitalstructure. methods impact local data.
-		mydigitalstructure.cloud. methods impact data managed by the mydigitalstructure.cloud service (remote).
+		entityos. methods impact local data.
+		entityos.cloud. methods impact data managed by the entityos.cloud service (remote).
 	*/
 
-	mydigitalstructure.init(main)
+	entityos.init(main)
 
 	function main(err, data)
 	{
 		/*
 			[LEARN EXAMPLE #1]
-			Use mydigitalstructure.add to add your controller methods to your app and mydigitalstructure.invoke to run them,
+			Use entityos.add to add your controller methods to your app and entityos.invoke to run them,
 			as per example learn-log.
 		*/
 
-		mydigitalstructure.add(
+		entityos.add(
 		{
 			name: 'learn-log',
 			code: function ()
 			{
-				console.log('Using mydigitalstructure module version ' + mydigitalstructure.VERSION);
+				console.log('Using entityos module version ' + entityos.VERSION);
 				
-				var eventData = mydigitalstructure.get(
+				var eventData = entityos.get(
 				{
 					scope: 'learn',
 					context: 'lambda',
 					name: 'event'
 				});
 
-				mydigitalstructure.cloud.invoke(
+				entityos.cloud.invoke(
 				{
 					object: 'core_debug_log',
 					fields:
@@ -71,17 +71,17 @@ exports.handler = function (event, context, callback)
 			}
 		});
 
-		mydigitalstructure.add(
+		entityos.add(
 		{
 			name: 'learn-log-saved',
 			code: function (param, response)
 			{
-				mydigitalstructure._util.message('learn-log event data saved to mydigitalstructure.cloud');
-				mydigitalstructure._util.message(param);
-				mydigitalstructure._util.message(response);
+				entityos._util.message('learn-log event data saved to entityos.cloud');
+				entityos._util.message(param);
+				entityos._util.message(response);
 			}
 		});
 		
-		mydigitalstructure.invoke('learn-log');
+		entityos.invoke('learn-log');
 	}
 }

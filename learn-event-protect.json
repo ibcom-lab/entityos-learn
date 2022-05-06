@@ -1,0 +1,6 @@
+{
+    "method": "util-protect-hash",
+	"text": "Hello World!",
+    "hash": "sha256",
+    "output": "base64"
+}	

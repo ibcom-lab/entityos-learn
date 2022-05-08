@@ -88,7 +88,7 @@ exports.handler = function (event, context, callback)
             name: 'util-protect-hash',
             code: function ()
             {
-                const { createHash } = require('crypto');
+                const { createHash, publicDecrypt, privateDecrypt } = require('crypto');
 
                 var event = entityos.get({ scope: '_event'});
 
@@ -210,6 +210,7 @@ exports.handler = function (event, context, callback)
         entityos.add(
         {
             name: 'util-protect-encrypt',
+            notes: 'Using shared key.',
             code: function ()
             {
                 const { createCipheriv, randomBytes } = require('crypto');
@@ -250,6 +251,7 @@ exports.handler = function (event, context, callback)
         entityos.add(
         {
             name: 'util-protect-decrypt',
+            notes: 'Using shared key.',
             code: function ()
             {
                 const { createDecipheriv, randomBytes } = require('crypto');
@@ -280,38 +282,165 @@ exports.handler = function (event, context, callback)
         entityos.add(
         {
             name: 'util-protect-sign',
+            notes: 'Use method: util-protect-keys if want to pre-create keys',
             code: function ()
             {
                 const { createSign, createVerify } = require('crypto');
-                const { publicKey, privateKey } = require('./keypair');
+                const { generateKeyPairSync } = require('crypto');
 
                 var event = entityos.get({ scope: '_event'});
 
-                /*const signer = createSign('rsa-sha256');
+                if (event.keyLength == undefined)
+                {
+                    event.keyLength = 2048
+                }
 
-                signer.update(message);
+                event.keyPublicType = 'spki' // recommended to be 'spki' by the Node.js docs
+                event.keyPrivateType = 'pkcs8' // recommended to be 'spki' by the Node.js docs
 
-                const signature = signer.sign(privateKey, 'hex');
+                if (event.privateKey == undefined || event.publicKey == undefined)
+                {
+                    const { privateKey, publicKey } = generateKeyPairSync('rsa',
+                    {
+                        modulusLength: event.keyLength,
+                        publicKeyEncoding:
+                        {
+                            type: event.keyPublicType,
+                            format: 'pem',
+                        },
+                        privateKeyEncoding:
+                        {
+                            type: event.keyPrivateType,
+                            format: 'pem'
+                        },
+                    });
 
+                    event.privateKey = privateKey;
+                    event.publicKey = publicKey;
+                }
 
-                event._keyPrivate = new Buffer.from(event.keyPrivate, 'hex');
-                event._initialisationVector = new Buffer.from(event.initialisationVector, 'hex');
+                const signer = createSign('rsa-sha256');
+                signer.update(event.text);
+                event.textSignature = signer.sign(privateKey, 'hex');
+
+                entityos.invoke('util-end', event);     
+            }
+        });
+
+        entityos.add(
+        {
+            name: 'util-protect-using-algorithm-encrypt',
+            notes: 'Using private/public keys and RSA algorithm.',
+            code: function ()
+            {
+                const { publicEncrypt, privateEncrypt } = require('crypto');
+                const { generateKeyPairSync } = require('crypto');
+
+                var event = entityos.get({ scope: '_event'});
+
+                if (event.privateKey == undefined && event.publicKey == undefined)
+                {
+                    event.keyPublicType = 'spki' // recommended to be 'spki' by the Node.js docs
+                    event.keyPrivateType = 'pkcs8' // recommended to be 'spki' by the Node.js docs
+
+                    if (event.keyLength == undefined)
+                    {
+                        event.keyLength = 2048
+                    }
+
+                    const { privateKey, publicKey } = generateKeyPairSync('rsa',
+                    {
+                        modulusLength: event.keyLength,
+                        publicKeyEncoding:
+                        {
+                            type: event.keyPublicType,
+                            format: 'pem',
+                        },
+                        privateKeyEncoding:
+                        {
+                            type: event.keyPrivateType,
+                            format: 'pem'
+                        },
+                    });
+
+                    event._keyPrivate = privateKey;
+                    event._keyPublic = publicKey;
+                }
+                else
+                {
+                    if (event.keyPrivate != undefined)
+                    {
+                        event._keyPrivate = new Buffer.from(event.keyPrivate, 'hex');
+                    }
+
+                    if (event.keyPublic != undefined)
+                    {
+                        event._keyPublic = new Buffer.from(event.keyPublic, 'hex');
+                    }
+                }
+
+                if (event._keyPrivate != undefined)
+                {
+                    event.textEncrypted = privateEncrypt(
+                        event._keyPrivate,
+                        Buffer.from(event.text)
+                    ).toString('hex');
+
+                    event.encryptedUsingPrivateKey = true;
+                }
+                else if (event._keyPublic != undefined)
+                {
+                    event.textEncrypted = publicEncrypt(
+                        event._keyPublic,
+                        Buffer.from(event.text)
+                    ).toString('hex');
+
+                    event.encryptedUsingPublicKey = true;
+                }
+
+                entityos.invoke('util-end', event);     
+            }
+        });
+
+        entityos.add(
+        {
+            name: 'util-protect-using-algorithm-decrypt',
+            notes: 'Using private/public keys and RSA algorithm.',
+            code: function ()
+            {
+                const { publicDecrypt, privateDecrypt } = require('crypto');
+
+                var event = entityos.get({ scope: '_event'});
+
+                if (event.keyPublic != undefined)
+                {
+                    event._keyPublic = event.keyPublic;
+                }
+
+                if (event.keyPrivate != undefined)
+                {
+                    event._keyPrivate = event.keyPrivate;
+                }
+
+                if (event._keyPublic != undefined)
+                {               
+                    event.textDecrypted = publicDecrypt(
+                        event._keyPublic,
+                        Buffer.from(event.text, 'hex')
+                    ).toString('utf-8');
+
+                    event.decryptedUsingPublicKey = true;
+                }
+                else if (event._keyPrivate != undefined)
+                {
+                    event.textDecrypted = privateDecrypt(
+                        event._keyPrivate,
+                        Buffer.from(event.text, 'hex')
+                    ).toString('utf-8');
+
+                    event.decryptedUsingPrivateKey = true;
+                }
                 
-                if (event.encryptionMethod == undefined)
-                {
-                    event.encryptionMethod = 'aes256'
-                }
-
-                const decipher = createDecipheriv(event.encryptionMethod, event._keyPrivate, event._initialisationVector);
-
-                if (event.output == undefined)
-                {
-                    event.output = 'hex' // 'base64'
-                }
-
-                event.textDecrypted = decipher.update(event.text, event.output, 'utf8') + decipher.final('utf8');
-                */
-
                 entityos.invoke('util-end', event);     
             }
         });

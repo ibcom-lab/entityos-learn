@@ -1,15 +1,16 @@
 {
-    "_method": "util-protect-hash",
+    "method": "util-protect-hash",
     "__method": "util-protect-hash-with-salt",
     "___method": "util-protect-hash-with-key",
     "____method": "util-protect-create-keys",
     "_____method": "util-protect-encrypt",
     "______method": "util-protect-sign",
-    "method": "util-protect-using-algorithm-encrypt",
-	"text": "Hello World!",
+    "_______method": "util-protect-using-algorithm-encrypt",
+	"text": "Hello World",
     "_text": "842ac9e7f66d128abdeb315c7ba980a9",
     "hashMethod": "sha256",
+    "_output": "hex",
+    "__output": "base64",
     "output": "hex",
-    "_output": "base64",
-    "__keyPrivate": "XXXX"
+    "keyPrivate": "d8cf294c-2e9f-46a4-bbfa-4b3bd61bb366"
 }	

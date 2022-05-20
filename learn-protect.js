@@ -24,6 +24,9 @@
     # NodeJS Crypto refence:
         - Full: https://nodejs.org/api/crypto.html 
         - Usage: https://nodejs.org/api/synopsis.html
+
+    # Online Hashing:
+    https://emn178.github.io/online-tools/sha256.html
 	
 */
 

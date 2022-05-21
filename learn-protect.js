@@ -470,6 +470,4 @@ exports.handler = function (event, context, callback)
         //STARTS HERE!
         entityos.invoke('learn-protect-init');
     }     
-
-
 }

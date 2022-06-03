@@ -222,27 +222,39 @@ exports.handler = function (event, context, callback)
 
                 if (event.keyPrivate == undefined)
                 {
-                    event.keyPrivate = randomBytes(32);
+                    event._keyPrivate = randomBytes(32);
+                    event.keyPrivate = event.keyPrivate.toString('hex');
+                }
+                else
+                {
+                    event._keyPrivate = new Buffer.from(event.keyPrivate, 'hex');
                 }
 
                 if (event.initialisationVector == undefined)
                 {
-                    event.initialisationVector = randomBytes(16);
+                    event._initialisationVector = randomBytes(16);
+                    event.initialisationVector = event.initialisationVector.toString('hex');
                 }
-
-                event.iv =  event.initialisationVector.toString('hex');
-                event.key =  event.keyPrivate.toString('hex');
+                else
+                {
+                    event._initialisationVector = new Buffer.from(event.initialisationVector, 'hex');
+                }
 
                 if (event.encryptionMethod == undefined)
                 {
                     event.encryptionMethod = 'aes256'
                 }
 
-                const cipher = createCipheriv(event.encryptionMethod, event.keyPrivate, event.initialisationVector);
+                const cipher = createCipheriv(event.encryptionMethod, event._keyPrivate, event._initialisationVector);
 
                 if (event.output == undefined)
                 {
                     event.output = 'hex' // 'base64'
+                }
+
+                if (event.text == undefined && event.data != undefined)
+                {
+                    event.text = JSON.stringify(event.data)
                 }
 
                 event.textEncrypted = cipher.update(event.text, 'utf8', event.output) + cipher.final(event.output);
@@ -271,12 +283,12 @@ exports.handler = function (event, context, callback)
 
                 const decipher = createDecipheriv(event.encryptionMethod, event._keyPrivate, event._initialisationVector);
 
-                if (event.output == undefined)
+                if (event.input == undefined)
                 {
-                    event.output = 'hex' // 'base64'
+                    event.input = 'hex' // 'base64'
                 }
 
-                event.textDecrypted = decipher.update(event.text, event.output, 'utf8') + decipher.final('utf8');
+                event.textDecrypted = decipher.update(event.text, event.input, 'utf8') + decipher.final('utf8');
 
                 entityos.invoke('util-end', event);     
             }

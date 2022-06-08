@@ -3,16 +3,6 @@
 
     It uses the NodeJS Crypto module, which is a wrapper for openSSL encryption functions.
 
-	To run it on your local computer your need to install:
-
-	https://www.npmjs.com/package/lambda-local:
-
-	And then run as:
-
-	lambda-local -l learn-protect.js -t 9000 -e learn-event-protect.json
-
-	- where the data in event.json will be passed to the handler as event and the settings.json data will passed as context.
-
 	Also see learn.js for more example code using the entityos node module.
 
 	Crypto references:
@@ -27,6 +17,18 @@
 
     # Online Hashing:
     https://emn178.github.io/online-tools/sha256.html
+
+    To run it on your local computer your need to install:
+
+	https://www.npmjs.com/package/lambda-local:
+
+	And then run as:
+
+	lambda-local -l learn-protect.js -t 9000 -e learn-event-protect.json
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-encrypt.json
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-decrypt.json
+
+    - where the data in event.json will be passed to the handler as event and the settings.json data will passed as context.
 	
 */
 
@@ -220,24 +222,29 @@ exports.handler = function (event, context, callback)
 
                 var event = entityos.get({ scope: '_event'});
 
+                if (event.keyFormat == undefined)
+                {
+                    event.keyFormat = 'hex'
+                }
+
                 if (event.keyPrivate == undefined)
                 {
                     event._keyPrivate = randomBytes(32);
-                    event.keyPrivate = event.keyPrivate.toString('hex');
+                    event.keyPrivate = event._keyPrivate.toString(event.keyFormat);
                 }
                 else
                 {
-                    event._keyPrivate = new Buffer.from(event.keyPrivate, 'hex');
+                    event._keyPrivate = new Buffer.from(event.keyPrivate,  event.keyFormat);
                 }
 
                 if (event.initialisationVector == undefined)
                 {
                     event._initialisationVector = randomBytes(16);
-                    event.initialisationVector = event.initialisationVector.toString('hex');
+                    event.initialisationVector = event._initialisationVector.toString(event.keyFormat);
                 }
                 else
                 {
-                    event._initialisationVector = new Buffer.from(event.initialisationVector, 'hex');
+                    event._initialisationVector = new Buffer.from(event.initialisationVector, event.keyFormat);
                 }
 
                 if (event.encryptionMethod == undefined)
@@ -254,7 +261,8 @@ exports.handler = function (event, context, callback)
 
                 if (event.text == undefined && event.data != undefined)
                 {
-                    event.text = JSON.stringify(event.data)
+                    event._text = JSON.stringify(event.data);
+                    event.text = _.escape(event._text);
                 }
 
                 event.textEncrypted = cipher.update(event.text, 'utf8', event.output) + cipher.final(event.output);
@@ -273,8 +281,13 @@ exports.handler = function (event, context, callback)
 
                 var event = entityos.get({ scope: '_event'});
 
-                event._keyPrivate = new Buffer.from(event.keyPrivate, 'hex');
-                event._initialisationVector = new Buffer.from(event.initialisationVector, 'hex');
+                if (event.keyFormat == undefined)
+                {
+                    event.keyFormat = 'hex'
+                }
+
+                event._keyPrivate = new Buffer.from(event.keyPrivate, event.keyFormat);
+                event._initialisationVector = new Buffer.from(event.initialisationVector, event.keyFormat);
                 
                 if (event.encryptionMethod == undefined)
                 {
@@ -288,7 +301,12 @@ exports.handler = function (event, context, callback)
                     event.input = 'hex' // 'base64'
                 }
 
-                event.textDecrypted = decipher.update(event.text, event.input, 'utf8') + decipher.final('utf8');
+                if (event.output == undefined)
+                {
+                    event.output = 'utf8'
+                }
+
+                event.textDecrypted = decipher.update(event.text, event.input, event.output) + decipher.final(event.output);
 
                 entityos.invoke('util-end', event);     
             }

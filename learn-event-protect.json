@@ -14,6 +14,7 @@
     "_output": "utf8",
     "__keyPrivate": "d8cf294c-2e9f-46a4-bbfa-4b3bd61bb366",
     "keyPrivate": "7c15f441140b320bd3e11d4653e6f64a9724a6927ddddd0f4f5d650b159b5be5",
+    "keyFormat": "base64",
     "initialisationVector": "4cc8ea9b70384ecfb88250b1b6a21752",
     "_data": {"fields":[],"summaryFields":[],"filters":[],"sorts":[{"name":"modifieddate","direction":"desc"}],"customoptions":[],"options":{"rf":"JSON","rows":"20","forceMore":"N","returnparameters":""}}
 }	

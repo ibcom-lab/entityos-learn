@@ -1,12 +1,12 @@
 {
     "method": "util-protect-decrypt",
+    "input": "base64",
+    "_input": "hex",
+    "_text": "3b75381b010116c87c92c44d17fe3a8c",
+    "text": "qyRXcjjSNwCAXq04NjpZuU6V5NYtqf1X6NZEUaAeReEkDxkhO7UY/m4Hx8iVLC5UyiKGuxJ+g7sQpp839fgZ395ib63oGGMiWqcJb+2qqLNTD/iAnReog3w0Tr8eZ1WTP0lXZj/z1czPnYKtuv77M3TrvVEbcgRVrAMJBDKzo2EwOfGXNb5qRv509A35EC4LIZOQ/wxTHORxoloQM/pFud5iWEhf5vJsqL1GRaOru02kOpg29W1mpiqdQpomXZLV",
+    "initialisationVector": "zP0WXwj7ZHnt7g2ILi3rLw==",
+    "keyPrivate": "hHSyblg5HN1rYimV7y9eYx+CU9v8NW1/idHahYuQFKQ=",
+    "keyFormat": "base64",
     "output": "utf8",
-    "_output": "base64",
-    "_initialisationVector": "ea432ae59ddf624823411b48cd0e8178",
-    "_keyPrivate": "a721e05932fad307c76444a2519a856df3c55655ef1f4c22b33cc9d9ebf2cd36",
-    "text": "3b75381b010116c87c92c44d17fe3a8c",
-    "initialisationVector": "4cc8ea9b70384ecfb88250b1b6a21752",
-    "keyPrivate": "7c15f441140b320bd3e11d4653e6f64a9724a6927ddddd0f4f5d650b159b5be5",
-    "_text": "7n1Dpsf0TEyI7ImDvOUWuLs3eVZrsKDGu3WtL7BeCfecytyXWac45u3ZsJdjnz/E5lMn+8SlyuSquQab4GI/XXsfgI+bF6bfIBIIifjf0LXxZ4ijBtw9XIMNBwDbH+L9O8wdaE5zOK3dALkwWtnd3LTIr1gTLz3CrAniCv1haxvfg4s+Cp7lwyejEJHkbK2GGt2WIfLpwSlcQZgBeOeSbLziUOf0/DyBIbbbyCxik57kEAZ/YJNowjhJiMy3KpHE",
-    "input": "hex"
-}	
+    "_output": "base64"
+}

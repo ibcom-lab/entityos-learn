@@ -35,6 +35,8 @@
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-create-keys-ed25519-pem.json
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-create-keys-ed25519-jwk.json
 
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-create-keys-ed25519-der-hex.json
+
      # protect-sign:
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-sign.json
 	lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-sign-hex-der-ed25519.json
@@ -267,6 +269,10 @@ exports.handler = function (event, context, callback)
                         event.keyPublic = publicKey.toString(event.output);
                     }
                 }
+
+                var Base58 = require("base-58");
+                event.keyPublicBase58 = Base58.encode(new Buffer.from(event.keyPublic, event.output));
+                event.keyPublicMultibase = 'z' + event.keyPublicBase58;
 
                 entityos.invoke('util-end', event);     
             }

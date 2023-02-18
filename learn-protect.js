@@ -32,14 +32,23 @@
 
     # protect-create-keys:
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-create-keys.json
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-create-keys-ed25519-pem.json
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-create-keys-ed25519-jwk.json
 
+     # protect-sign:
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-sign.json
+
+    # util-protect-encrypt
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-encrypt.json
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-encrypt-aes-base64.json
+    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-decrypt.json
+
+    # util-protect-using-algorithm-encrypt
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-using-algorithm-encrypt-rsa-private-pem.json
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-using-algorithm-decrypt-rsa-public-pem.json
 
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-using-algorithm-encrypt-rsa-private-pem-foundation-community.json
 
-    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-encrypt.json
-    lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-decrypt.json
 
     - where the data in event.json will be passed to the handler as event and the settings.json data will passed as context.
 	
@@ -192,7 +201,7 @@ exports.handler = function (event, context, callback)
 
                 var event = entityos.get({ scope: '_event'});
 
-                if (event.keyMethod == undefined) // 'rsa', ed25519
+                if (event.keyMethod == undefined) // 'rsa', 'ed25519'
                 {
                     event.keyMethod = 'rsa'
                 }
@@ -202,12 +211,12 @@ exports.handler = function (event, context, callback)
                     event.keyLength = 2048
                 }
 
-                if (event.format == undefined) //'pem', 'der', 'jwk'
+                if (event.keyFormat == undefined) //'pem', 'der', 'jwk'
                 {
-                    event.format = 'pem'
+                    event.keyFormat = 'pem'
                 }
 
-                if (event.output == undefined && (event.format == 'der' || event.format == 'jwk'))
+                if (event.output == undefined && (event.keyFormat == 'der' || event.keyFormat == 'jwk'))
                 {
                     //event.output = 'base64' // 'hex'
                 }
@@ -228,12 +237,12 @@ exports.handler = function (event, context, callback)
                     publicKeyEncoding:
                     {
                         type: event.keyPublicType,
-                        format: event.format,
+                        format: event.keyFormat,
                     },
                     privateKeyEncoding:
                     {
                         type: event.keyPrivateType,
-                        format: event.format,
+                        format: event.keyFormat,
                         cipher: event.keyCipher, // eg 'aes-256-cbc'
                         passphrase: event.keyCipherSecret 
                     },
@@ -272,41 +281,41 @@ exports.handler = function (event, context, callback)
 
                 var event = entityos.get({ scope: '_event'});
 
-                if (event.keyFormat == undefined)
+                if (event.format == undefined)
                 {
-                    event.keyFormat = 'hex'
+                    event.format = 'base64' // 'hex,utf8'
                 }
 
                 if (event.keyPrivate == undefined)
                 {
                     event._keyPrivate = randomBytes(32);
-                    event.keyPrivate = event._keyPrivate.toString(event.keyFormat);
+                    event.keyPrivate = event._keyPrivate.toString(event.format);
                 }
                 else
                 {
-                    event._keyPrivate = new Buffer.from(event.keyPrivate,  event.keyFormat);
+                    event._keyPrivate = new Buffer.from(event.keyPrivate, event.format);
                 }
 
                 if (event.initialisationVector == undefined)
                 {
                     event._initialisationVector = randomBytes(16);
-                    event.initialisationVector = event._initialisationVector.toString(event.keyFormat);
+                    event.initialisationVector = event._initialisationVector.toString(event.format);
                 }
                 else
                 {
-                    event._initialisationVector = new Buffer.from(event.initialisationVector, event.keyFormat);
+                    event._initialisationVector = new Buffer.from(event.initialisationVector, event.format);
                 }
 
                 if (event.encryptionMethod == undefined)
                 {
-                    event.encryptionMethod = 'aes256'
+                    event.encryptionMethod = 'aes-256-cbc'
                 }
 
                 const cipher = createCipheriv(event.encryptionMethod, event._keyPrivate, event._initialisationVector);
 
                 if (event.output == undefined)
                 {
-                    event.output = 'hex' // 'base64'
+                    event.output = 'base64' // 'hex,utf8'
                 }
 
                 if (event.text == undefined && event.data != undefined)
@@ -331,29 +340,29 @@ exports.handler = function (event, context, callback)
 
                 var event = entityos.get({ scope: '_event'});
 
-                if (event.keyFormat == undefined)
+                if (event.format == undefined)
                 {
-                    event.keyFormat = 'hex'
+                    event.format = 'base64' // 'hex', 'utf8'
                 }
 
-                event._keyPrivate = new Buffer.from(event.keyPrivate, event.keyFormat);
-                event._initialisationVector = new Buffer.from(event.initialisationVector, event.keyFormat);
+                event._keyPrivate = new Buffer.from(event.keyPrivate, event.format);
+                event._initialisationVector = new Buffer.from(event.initialisationVector, event.format);
                 
                 if (event.encryptionMethod == undefined)
                 {
-                    event.encryptionMethod = 'aes256'
+                    event.encryptionMethod = 'aes-256-cbc';
                 }
 
                 const decipher = createDecipheriv(event.encryptionMethod, event._keyPrivate, event._initialisationVector);
 
                 if (event.input == undefined)
                 {
-                    event.input = 'hex' // 'base64'
+                    event.input = 'base64' // 'hex', 'utf8'
                 }
 
                 if (event.output == undefined)
                 {
-                    event.output = 'utf8'
+                    event.output = 'base64' // 'hex', 'utf8'
                 }
 
                 event.textDecrypted = decipher.update(event.text, event.input, event.output) + decipher.final(event.output);
@@ -368,14 +377,34 @@ exports.handler = function (event, context, callback)
             notes: 'Use method: util-protect-keys if want to pre-create keys',
             code: function ()
             {
-                const { createSign, createVerify } = require('crypto');
+                const { createSign, createVerify, getHashes, sign } = require('crypto');
                 const { generateKeyPairSync } = require('crypto');
 
                 var event = entityos.get({ scope: '_event'});
 
+                if (event.keyMethod == undefined) 
+                {
+                    event.keyMethod = 'rsa' // 'ed25519'
+                }
+
                 if (event.keyLength == undefined)
                 {
                     event.keyLength = 2048
+                }
+
+                if (event.output == undefined)
+                {
+                    event.output = 'base64' // 'hex', 'utf8'
+                }
+
+                if (event.hashMethod == undefined)
+                {
+                    event.hashMethod = 'sha256'
+                }
+
+                if (event.keyFormat == undefined) //'pem', 'der', 'jwk'
+                {
+                    event.keyFormat = 'pem'
                 }
 
                 event.keyPublicType = 'spki' // recommended to be 'spki' by the Node.js docs
@@ -383,18 +412,18 @@ exports.handler = function (event, context, callback)
 
                 if (event.privateKey == undefined || event.publicKey == undefined)
                 {
-                    const { privateKey, publicKey } = generateKeyPairSync('rsa',
+                    const { privateKey, publicKey } = generateKeyPairSync(event.keyMethod,
                     {
                         modulusLength: event.keyLength,
                         publicKeyEncoding:
                         {
                             type: event.keyPublicType,
-                            format: 'pem',
+                            format: event.keyFormat,
                         },
                         privateKeyEncoding:
                         {
                             type: event.keyPrivateType,
-                            format: 'pem'
+                            format: event.keyFormat
                         },
                     });
 
@@ -402,9 +431,16 @@ exports.handler = function (event, context, callback)
                     event.publicKey = publicKey;
                 }
 
-                const signer = createSign('rsa-sha256');
+                /*const signer = createSign(event.keyMethod + '-' + event.hashMethod);
                 signer.update(event.text);
-                event.textSignature = signer.sign(privateKey, 'hex');
+                event.textSignature = signer.sign(privateKey, event.output);
+                */
+
+              //https://stackoverflow.com/questions/71916954/crypto-sign-function-to-sign-a-message-with-given-private-key
+
+               event.textSignature = sign(event.keyMethod, Buffer.from(event.text), event.privateKey);
+
+               event.hashes = getHashes();
 
                 entityos.invoke('util-end', event);     
             }

@@ -1,0 +1,9 @@
+{
+    
+    "method": "util-protect-encrypt",
+	"text": "Hello World",
+    "_data": {"hello": "world"},
+    "format": "base64",
+    "encryptionMethod": "aes-256-cbc",
+    "output": "base64"
+}	

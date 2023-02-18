@@ -1,0 +1,9 @@
+{
+    "method": "util-protect-create-keys",
+    "keyMethod": "ed25519",
+    "format": "jwk",
+    "output": "base64",
+    "keyLength": "2048",
+    "keyPublicType": "spki",
+    "keyPrivateType": "pkcs8"
+}	

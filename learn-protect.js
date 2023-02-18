@@ -37,6 +37,7 @@
 
      # protect-sign:
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-sign.json
+	lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-sign-hex-der-ed25519.json
 
     # util-protect-encrypt
     lambda-local -l learn-protect.js -t 9000 -e learn-event-protect-encrypt.json
@@ -271,6 +272,104 @@ exports.handler = function (event, context, callback)
             }
         });
 
+		entityos.add(
+        {
+            name: 'util-protect-sign',
+            notes: 'Use method: util-protect-keys if want to pre-create keys',
+            code: function ()
+            {
+                const { createSign, createVerify, getHashes, sign, createPrivateKey } = require('crypto');
+                const { generateKeyPairSync } = require('crypto');
+
+                var event = entityos.get({ scope: '_event'});
+
+                if (event.keyMethod == undefined) 
+                {
+                    event.keyMethod = 'rsa' // 'ed25519'
+                }
+
+                if (event.keyLength == undefined)
+                {
+                    event.keyLength = 2048
+                }
+
+				if (event.input == undefined)
+                {
+                    event.input = 'base64' // 'hex', 'utf8'
+                }
+
+                if (event.output == undefined)
+                {
+                    event.output = 'base64' // 'hex', 'utf8'
+                }
+
+                /*if (event.hashMethod == undefined)
+                {
+                    event.hashMethod = 'sha256'
+                }*/
+
+                if (event.keyFormat == undefined) //'pem', 'der', 'jwk'
+                {
+                    event.keyFormat = 'pem'
+                }
+
+                event.keyPublicType = 'spki' // recommended to be 'spki' by the Node.js docs
+                event.keyPrivateType = 'pkcs8' // recommended to be 'spki' by the Node.js docs
+
+                if (event.keyPrivate == undefined)
+                {
+                    const { privateKey, publicKey } = generateKeyPairSync(event.keyMethod,
+                    {
+                        modulusLength: event.keyLength,
+                        publicKeyEncoding:
+                        {
+                            type: event.keyPublicType,
+                            format: event.keyFormat,
+                        },
+                        privateKeyEncoding:
+                        {
+                            type: event.keyPrivateType,
+                            format: event.keyFormat
+                        },
+                    });
+
+                    event.keyPrivate = privateKey;
+                    event.keyPublic = publicKey;
+                }
+				else
+				{
+					console.log(event.keyPrivate);
+					event._keyPrivate = new Buffer.from(event.keyPrivate, event.input);
+					event._keyPrivateDer = event._keyPrivate.subarray(0, 64)
+					//event._keyPrivateHex = event._keyPrivate.toString('hex');
+				}
+
+                //https://stackoverflow.com/questions/71916954/crypto-sign-function-to-sign-a-message-with-given-private-key
+
+				if (event.keyFormat == 'der')
+				{
+
+					event.keyAsPkcs8der = createPrivateKey({key: event._keyPrivateDer, format: 'der', type: 'pkcs8'})
+					event._text = Buffer.from(event.text, 'utf8')
+					event._textSignature = sign(null, event._text, event.keyAsPkcs8der);
+
+				}
+				else
+				{
+					//event.hashes = getHashes();
+					const signer = createSign(event.keyMethod + '-' + event.hashMethod);
+					signer.update(event._text);
+					event._textSignature = signer.sign(event._keyPrivate, event.output);
+
+					//event._textSignature = sign(event.keyFormat, event._text, event._keyPrivate);
+				}
+				
+				event.textSignature = event._textSignature.toString(event.output)
+
+                entityos.invoke('util-end', event);     
+            }
+        });
+
         entityos.add(
         {
             name: 'util-protect-encrypt',
@@ -366,81 +465,6 @@ exports.handler = function (event, context, callback)
                 }
 
                 event.textDecrypted = decipher.update(event.text, event.input, event.output) + decipher.final(event.output);
-
-                entityos.invoke('util-end', event);     
-            }
-        });
-
-        entityos.add(
-        {
-            name: 'util-protect-sign',
-            notes: 'Use method: util-protect-keys if want to pre-create keys',
-            code: function ()
-            {
-                const { createSign, createVerify, getHashes, sign } = require('crypto');
-                const { generateKeyPairSync } = require('crypto');
-
-                var event = entityos.get({ scope: '_event'});
-
-                if (event.keyMethod == undefined) 
-                {
-                    event.keyMethod = 'rsa' // 'ed25519'
-                }
-
-                if (event.keyLength == undefined)
-                {
-                    event.keyLength = 2048
-                }
-
-                if (event.output == undefined)
-                {
-                    event.output = 'base64' // 'hex', 'utf8'
-                }
-
-                if (event.hashMethod == undefined)
-                {
-                    event.hashMethod = 'sha256'
-                }
-
-                if (event.keyFormat == undefined) //'pem', 'der', 'jwk'
-                {
-                    event.keyFormat = 'pem'
-                }
-
-                event.keyPublicType = 'spki' // recommended to be 'spki' by the Node.js docs
-                event.keyPrivateType = 'pkcs8' // recommended to be 'spki' by the Node.js docs
-
-                if (event.privateKey == undefined || event.publicKey == undefined)
-                {
-                    const { privateKey, publicKey } = generateKeyPairSync(event.keyMethod,
-                    {
-                        modulusLength: event.keyLength,
-                        publicKeyEncoding:
-                        {
-                            type: event.keyPublicType,
-                            format: event.keyFormat,
-                        },
-                        privateKeyEncoding:
-                        {
-                            type: event.keyPrivateType,
-                            format: event.keyFormat
-                        },
-                    });
-
-                    event.privateKey = privateKey;
-                    event.publicKey = publicKey;
-                }
-
-                /*const signer = createSign(event.keyMethod + '-' + event.hashMethod);
-                signer.update(event.text);
-                event.textSignature = signer.sign(privateKey, event.output);
-                */
-
-              //https://stackoverflow.com/questions/71916954/crypto-sign-function-to-sign-a-message-with-given-private-key
-
-               event.textSignature = sign(event.keyMethod, Buffer.from(event.text), event.privateKey);
-
-               event.hashes = getHashes();
 
                 entityos.invoke('util-end', event);     
             }

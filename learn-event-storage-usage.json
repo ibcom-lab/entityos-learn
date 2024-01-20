@@ -1,9 +1,4 @@
 {
-	"method": "learn-storage-usage",
-	"provider":
-	{
-		"name": "iagon",
-		"hostname": "gw.iagon.com",
-		"apikey": "ll.IAG-SN.xxxx"
-	}
+	"context": "storage",
+	"method": "learn-storage-usage"
 }	

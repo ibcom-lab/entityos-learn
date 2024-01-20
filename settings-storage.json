@@ -1,0 +1,25 @@
+{
+	"entityos":
+	{
+		"_hostname": "api.entityos.cloud", 
+		"_logon": "x", 
+		"_password": "x",
+		"_email": "team@entityos.cloud",
+		"testing": 
+		{
+			"status": "true",
+			"showData": "true",
+			"break": "-"
+		},
+		"convert": "true"
+	},
+    "storage":
+    {
+        "provider":
+        {
+            "name": "iagon",
+            "hostname": "gw.iagon.com",
+            "apikey": "ll.IAG-SN......"
+        }
+    }
+}	

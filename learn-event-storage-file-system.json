@@ -1,0 +1,5 @@
+{
+	"context": "storage",
+	"method": "learn-storage-file-system",
+    "action": "get-root-directory"
+}	

@@ -7,15 +7,16 @@
 	References:
 
 	# https://buildingoncardano.dev
+	# https://docs.iagon.com/docs/mainnet-guide/api/
+	# https://docs.api.iagon.com/#987c958c-f6bd-4b9c-98f0-e3b8e3a2b1f9
     
     To run it on your local computer your need to install:
 
 	https://www.npmjs.com/package/lambda-local:
 
 	And then run as:
-
-    # all:
-	lambda-local -l learn-storage.js -t 9000 -e learn-event-storage-usage.json 
+	lambda-local -l learn-storage.js -t 9000 -e learn-event-storage-usage.json
+	lambda-local -l learn-storage.js -t 9000 -e learn-event-storage-file-system.json
 
 */
 
@@ -42,9 +43,9 @@ exports.handler = function (event, context, callback)
 		value: callback
 	});
 
-    //entityos.init(main);
+    entityos.init(main);
 	// For interacting with entityos.cloud, if/when needed.
-    main();
+    //main();
 
     function main(err, data)
     {
@@ -61,61 +62,132 @@ exports.handler = function (event, context, callback)
 			{
 				console.log('Using entityos module version ' + entityos.VERSION);
 
-				var event = entityos.get({ scope: '_event' });
+				var settings = entityos.get({ scope: '_settings' });
+				console.log(settings, 'SETTINGS');
 
-				if (event.method == undefined) {
+				if (event.method == undefined)
+				{
 					event.method = 'learn-storage-usage';
 				}
 
-				entityos.invoke(event.method);
-			}
-		});
-
-		entityos.add(
-		{
-			name: 'learn-storage-usage',
-			code: function ()
-			{
-				console.log('>> learn-storage-usage')
-				var event = entityos.get({ scope: '_event' });
-
-				if (event.provider.hostname == undefined)
+				if (event.provider != undefined)
 				{
-					entityos.invoke('util-end', 'No hostname');
+					settings.storage.provider = event.provider;
+				}
+
+				if (settings.storage.provider.hostname == undefined)
+				{
+					entityos.invoke('util-end', 'No hostname [settings.json|storage.provider]');
 				}
 				else
 				{
-					entityos._util.send(
-					{
-						headers: { 'x-api-key': event.provider.apikey },
-						hostname: event.provider.hostname,
-						path: '/api/v2/storage/consumed',
-						method: 'GET'
-					},
-					'learn-storage-usage-process');
+					entityos.invoke(event.method);
 				}
 			}
 		});
 
+		//-- GET STORAGE USAGE
+
 		entityos.add(
-		{
-			name: 'learn-storage-usage-process',
-			code: function (options, response)
+		[
 			{
-				console.log('>> learn-storage-usage-process')
+				name: 'learn-storage-usage',
+				code: function ()
+				{
+					var settings = entityos.get({ scope: '_settings' });
 
-				var event = entityos.get({ scope: '_event' });
+					if (settings.storage.provider.hostname == undefined)
+					{
+						entityos.invoke('util-end', 'No hostname [settings.json|storage.provider]');
+					}
+					else
+					{
+						entityos._util.send(
+						{
+							headers: { 'x-api-key': settings.storage.provider.apikey },
+							hostname: settings.storage.provider.hostname,
+							path: '/api/v2/storage/consumed',
+							method: 'GET'
+						},
+						'learn-storage-usage-process');
+					}
+				}
+			},		
+			{
+				name: 'learn-storage-usage-process',
+				code: function (options, response)
+				{
+					console.log('>>learn-storage-usage-process')
 
-				console.log(response);
-				console.log(response.data);
-				console.log(response.data.data.totalNativeFileSizeInKB);
+					var event = entityos.get({ scope: '_event' });
+					var settings = entityos.get({ scope: '_settings' });
 
-				event.usage = { totalNativeFileSizeInKB: response.data.data.totalNativeFileSizeInKB }
-				event.provider.apikey = _.truncate(event.provider.apikey, { length: 20 });
+					entityos._util.testing.data(response.data, 'learn-storage-usage-process')
 
-				entityos.invoke('util-end', event);
+					event.usage = { totalNativeFileSizeInKB: response.data.data.totalNativeFileSizeInKB }
+					event._apikey = _.truncate(settings.storage.provider.apikey, { length: 20 });
+
+					entityos.invoke('util-end', event);
+				}
 			}
-		});
+		]);
+
+		//-- LIST DIRECTORIES / FILES
+
+		entityos.add(
+		[
+			{
+				name: 'learn-storage-file-system',
+				code: function ()
+				{
+					var settings = entityos.get({ scope: '_settings' });
+					var event = entityos.get({ scope: '_event' });
+
+					if (event.action != undefined)
+					{
+						//get-root-directory is default, so do nothing in this case
+						//else add say &"parent_directory_id=
+					}
+
+					entityos._util.send(
+					{
+						headers: { 'x-api-key': settings.storage.provider.apikey },
+						hostname: settings.storage.provider.hostname,
+						path: '/api/v2/storage/directory?visibility=public&listingType=index',
+						method: 'GET'
+					},
+					'learn-storage-file-system-process');
+				}
+			},		
+			{
+				name: 'learn-storage-file-system-process',
+				code: function (options, response)
+				{
+					var event = entityos.get({ scope: '_event' });
+					var settings = entityos.get({ scope: '_settings' });
+
+					entityos._util.testing.data(response, 'learn-storage-file-system-process');
+
+					var event = entityos.get({ scope: '_event' });
+
+					event.filesystem = {}
+
+					if (response.data.data.directories.length != 0)
+					{
+						event.filesystem.info = _.first(response.data.data.directories);
+					}
+
+					if (event.action == 'get-root-directory' && event.filesystem.info != undefined)
+					{
+						event.filesystem.root = event.filesystem.info._id;
+					}
+					
+					event._apikey = _.truncate(settings.storage.provider.apikey, { length: 20 });
+
+					entityos.invoke('util-end', event);
+				}
+			}
+		]);
 
 		entityos.add(
 		{

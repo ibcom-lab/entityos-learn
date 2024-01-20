@@ -1,5 +1,5 @@
 /*
-	This is an example app to use as starting point for building a mydigitalstucture.cloud based nodejs app ... 
+	This is an example app to use as starting point for building a entityos.cloud based nodejs app ... 
 	Once nodejs has been installed; run 'node learn.js' using the OS terminal/console command prompt
 
 	If you plan to host the app using AWS lambda then check out index.js

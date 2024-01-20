@@ -1,10 +1,10 @@
 {
-	"mydigitalstructure":
+	"entityos":
 	{
-		"hostname": "api.debug.mydigitalstructure.cloud", 
+		"hostname": "api.entityos.cloud", 
 		"logon": "x", 
 		"password": "x",
-		"email": "support@mydigitalstructure.cloud",
+		"email": "team@entityos.cloud",
 		"testing": 
 		{
 			"status": "true",

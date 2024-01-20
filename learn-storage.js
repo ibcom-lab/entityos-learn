@@ -10,7 +10,7 @@
 	# https://docs.iagon.com/docs/mainnet-guide/api/
 	# https://docs.api.iagon.com/#987c958c-f6bd-4b9c-98f0-e3b8e3a2b1f9
 
-    To run it on your local computer your need to install:
+	To run it on your local computer your need to install:
 
 	https://www.npmjs.com/package/lambda-local:
 
@@ -49,7 +49,6 @@ exports.handler = function (event, context, callback)
 	{
 		/*
 			[LEARN #2]
-
 			This example shows how to get file storage from iagon API.
 		*/
 

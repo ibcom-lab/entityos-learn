@@ -68,12 +68,8 @@ module.exports =
 						module.exports.data.settings = settings;
 					}
 
-					var logon = false;
-
-					if (_.has(settings, 'entityos.logon'))
-					{
-						logon = _.isSet(settings.entityos.logon)
-					}
+					var logon = (settings.logon != undefined);
+					module.exports._util.testing.data(logon, 'entityos-init|entityos-cloud-logon');
 
 					if (logon)
 					{

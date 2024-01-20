@@ -1,15 +1,15 @@
 /*
 	LEARN; Storaging files on storage services.
-    e.g iagon.com
+	e.g iagon.com
 
- 	Also see learn.js for more example code using the entityos node module.
+	Also see learn.js for more example code using the entityos node module.
 
 	References:
 
 	# https://buildingoncardano.dev
 	# https://docs.iagon.com/docs/mainnet-guide/api/
 	# https://docs.api.iagon.com/#987c958c-f6bd-4b9c-98f0-e3b8e3a2b1f9
-    
+
     To run it on your local computer your need to install:
 
 	https://www.npmjs.com/package/lambda-local:
@@ -43,12 +43,10 @@ exports.handler = function (event, context, callback)
 		value: callback
 	});
 
-    entityos.init(main);
-	// For interacting with entityos.cloud, if/when needed.
-    //main();
+	entityos.init(main);
 
-    function main(err, data)
-    {
+	function main(err, data)
+	{
 		/*
 			[LEARN #2]
 
